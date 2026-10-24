@@ -396,6 +396,47 @@ h3 { line-height: 1.3; }
 
 .ph span { font-size: 2.4rem; }
 
+/* Project slider */
+.proj[hidden] { display: none; }
+
+.slide { animation: slideIn .45s ease; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pnav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.pcount {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: .9rem;
+  min-width: 48px;
+  text-align: center;
+}
+
+.dots { display: flex; gap: 8px; }
+
+.dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: var(--line);
+  cursor: pointer;
+  transition: .3s;
+}
+
+.dot.active { width: 26px; background: var(--accent); }
+
 .soon {
   margin-top: 20px;
   border-style: dashed;
@@ -875,7 +916,7 @@ const PROJECTS = [{
   linkText: "View on Kingkoy.com ↗",
   shots: [
     {
-      src: "image.png",
+      src: "image_2026-10-24_190804445.png",
       title: "Making a movie site",
       desc: "A simple movie site that displays a list of movies and their details."
     },
@@ -885,7 +926,37 @@ const PROJECTS = [{
       desc: "One of the projects I built to qualify. I learned a lot from this project."
     }
   ]
-}];
+},
+{
+    title: "Group Game Making",
+    desc: "A group project called Flappy Ball, inspired by simple obstacle-avoidance games. The player controls a ball and must time each jump carefully.",
+    tags: ["HTML", "CSS", "JavaScript"],
+    role: [
+      "Contributed most of the work to developing the game",
+      "Enjoyed building and testing the game mechanics",
+      "Identified areas that could be improved in future updates"
+    ],
+    link: "https://umblegod.github.io/Flappy-Ball-test/",
+    linkText: "Play Flappy Ball ↗",
+    shots: [
+      {
+        src: "image.png",
+        title: "Flappy Ball",
+        desc: "Control the ball by clicking or pressing the Space key to jump and avoid obstacles."
+      },
+      {
+        src: "Untitled1.png",
+        title: "Timing & Skills",
+        desc: "The player must time each jump carefully, react to obstacles, and maintain control to keep the ball moving forward."
+      },
+      {
+        src: "Untitled2.png",
+        title: "Death Info and Meter",
+        desc: "Shows the game-over screen and score information after the player hits an obstacle, giving them a chance to review their performance."
+      }
+    ]
+  }
+];
 
 function escapeHTML(value) {
   return String(value).replace(/[&<>"]/g, character => ({
@@ -917,7 +988,7 @@ const plist = $("#plist");
 
 PROJECTS.forEach((project, index) => {
   const article = document.createElement("article");
-  article.className = "card proj rv";
+  article.className = "card proj slide";
 
   const thumb = document.createElement("button");
   thumb.className = "thumb";
@@ -994,6 +1065,58 @@ PROJECTS.forEach((project, index) => {
   article.append(thumb, body);
   plist.appendChild(article);
 });
+
+/* Project slider */
+const slides = Array.from(plist.children);
+
+if (slides.length > 1) {
+  let current = 0;
+
+  const nav = document.createElement("div");
+  nav.className = "pnav";
+
+  const prev = document.createElement("button");
+  prev.className = "icon-btn";
+  prev.type = "button";
+  prev.textContent = "‹";
+  prev.setAttribute("aria-label", "Previous project");
+
+  const next = document.createElement("button");
+  next.className = "icon-btn";
+  next.type = "button";
+  next.textContent = "›";
+  next.setAttribute("aria-label", "Next project");
+
+  const count = document.createElement("span");
+  count.className = "pcount";
+
+  const dotsWrap = document.createElement("div");
+  dotsWrap.className = "dots";
+
+  const dots = slides.map((_, i) => {
+    const dot = document.createElement("button");
+    dot.className = "dot";
+    dot.type = "button";
+    dot.setAttribute("aria-label", "Go to project " + (i + 1));
+    dot.addEventListener("click", () => goTo(i));
+    dotsWrap.appendChild(dot);
+    return dot;
+  });
+
+  function goTo(i) {
+    current = (i + slides.length) % slides.length;
+    slides.forEach((slide, k) => { slide.hidden = k !== current; });
+    dots.forEach((dot, k) => dot.classList.toggle("active", k === current));
+    count.textContent = (current + 1) + " / " + slides.length;
+  }
+
+  prev.addEventListener("click", () => goTo(current - 1));
+  next.addEventListener("click", () => goTo(current + 1));
+
+  nav.append(prev, count, dotsWrap, next);
+  plist.after(nav);
+  goTo(0);
+}
 
 /* Screenshot viewer */
 const lb = $("#lb");
